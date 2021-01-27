@@ -57,9 +57,8 @@ def on_message(client, userdata, message):
             userdata.print_room()
         if topic[2] == "move":
             move = json.loads(msg)
+            userdata.make_move(move)
             userdata.print_room()
-            print("move: ")
-            print(move[0], move[1])
 
 
     if topic[1] == "leaving":
@@ -112,9 +111,10 @@ while running:
                 player._userdata.leave()
                 player.unsubscribe(f"{room}/#")
             
-            # if userdata.playing:
-            #     if message == "!move":
-            #         player.publish(f"{room}/game/move", json.dumps([userdata.name, userdata.deck[0]]))
+            if userdata.playing:
+                if userdata.gaming:
+                    if message == "!move":
+                        player.publish(f"{room}/game/move", json.dumps([userdata.id, userdata.deck[0]]))
 
         else:
             player.publish(f"{room}/chat", json.dumps([userdata.name, message]))
