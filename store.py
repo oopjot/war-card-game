@@ -1,6 +1,7 @@
 import json
 import os
 import random
+from pprint import pprint
 
 def get_cards():
     cards = {
@@ -30,26 +31,31 @@ def get_cards():
 
 class Store:
     def __init__(self):
+        # Own
         self.id = None
         self.connected = False
         self.in_room = False
+        self.name = None
+        self.playing = False
+        self.deck = get_cards()
+
+        # Shared
         self.room = ""
         self.spectators = []
         self.players = []
         self.messages = []
-        self.name = None
-        self.playing = False
         self.status = "Waiting for players"
-        self.deck = get_cards()
         self.gaming = False
         self.moves = []
         self.scores = []
-
+        self.winner = None
         self.game_messages = []
 
     def start_playing(self):
         self.playing = True
-        # self.deck = get_cards()
+    
+    def shuffle(self):
+        random.shuffle(self.deck)
 
     def get_room_state(self):
         return json.dumps({
@@ -62,6 +68,24 @@ class Store:
             "game_messages": self.game_messages
         })
     
+    def get_store_state(self):
+        return json.dumps({
+            "id": self.id,
+            "connected": self.connected,
+            "in_room": self.in_room,
+            "name": self.name,
+            "playing": self.playing,
+            "deck": self.deck,
+            "room": self.room,
+            "spectators": self.spectators,
+            "players": self.players,
+            "messages": self.messages,
+            # "gaming": self.gaming,
+            "moves": self.moves,
+            "scores": self.scores,
+            "winner": self.winner
+        })
+
     def set_room_state(self, room):
         self.room = room["room"]
         self.spectators = room["spectators"]
@@ -71,6 +95,17 @@ class Store:
         self.game_messages = room["game_messages"]
         self.scores = room["scores"]
 
+    def surrender(self, player):
+        self.players.remove(player)
+        for score in self.scores:
+            if score[0] == player[0]:
+                self.scores.remove(score)
+        self.scores[0][1] = 52
+        self.winner = self.players[0]
+        self.deck = get_cards()
+        self.gaming = False
+        self.spectators.append(player)
+        
 
     def connect(self):
         self.connected = True
@@ -113,8 +148,8 @@ class Store:
                     self.spectators.remove(player)
             self.players.append(player)
             self.scores.append([player[0], 52])
+            self.winner = None
             if len(self.players) == 2:
-                self.set_status("Playing")
                 self.gaming = True
 
     def add_message(self, message):
@@ -194,21 +229,27 @@ class Store:
                         s[1] += 1
                     else:
                         s[1] -= 1
-                self.game_messages.append(f"{player[1]} won this round")
+                        if s[1] == 0:
+                            self.game_messages.append(f"{player[1]} lost the game :(")
+                            self.winner = winner
+                if not self.winner:
+                    self.game_messages.append(f"{player[1]} won this round")
             else:
                 self.game_messages.append("draw")
         
 
 
     def update_status(self):
-        if len(self.players) < 2:
-            self.status = "Waiting for players to join"
         if self.gaming:
-            self.status = "Game started"
+            self.set_status("Playing")
+        if self.winner:
+            self.set_status(f"The winner is: {self.winner[1]}! Congratulations")
+
         
 
     
     def print_room(self):
+        self.update_status()
         if self.in_room:
             os.system("clear")
             print("Room: " + self.room + "            " + "Status: " + self.status)
@@ -229,8 +270,9 @@ class Store:
             for msg in self.game_messages:
                 print(msg)
             
+            # pprint(self.deck)
 
-    
+
         else:
             os.system("clear")
             print("Hello, ", self.name)

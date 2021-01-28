@@ -3,15 +3,7 @@ from uuid import uuid4
 import json
 import os
 from store import Store
-
-clean_deck = {
-    "clubs": ["A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"],
-    "diamonds": ["A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"],
-    "hearts": ["A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"],
-    "spades": ["A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"],
-}
-
-
+from pprint import pprint
 
 def on_connect(client, userdata, flags, rc):
     print("Welcome")
@@ -31,7 +23,8 @@ def on_message(client, userdata, message):
     msg = message.payload
 
     if topic[0] == "broadcast":
-        print("jeden dwa trzy", str(msg))
+        print("room state")
+        pprint(json.loads(userdata.get_room_state()))
         return
 
     if topic[1] == "joining":
@@ -58,6 +51,10 @@ def on_message(client, userdata, message):
         if topic[2] == "move":
             move = json.loads(msg)
             userdata.make_move(move)
+            userdata.print_room()
+        if topic[2] == "ff":
+            player = json.loads(msg)
+            userdata.surrender(player)
             userdata.print_room()
 
 
@@ -115,6 +112,13 @@ while running:
                 if userdata.gaming:
                     if message == "!move":
                         player.publish(f"{room}/game/move", json.dumps([userdata.id, userdata.deck[0]]))
+                    if message == "!ff":
+                        player.publish(f"{room}/game/ff", json.dumps([userdata.id, userdata.name]))
+                    if message == "!shuffle":
+                        player._userdata.shuffle()
+        
+        elif message == "get_data":
+            player.publish("broadcast")
 
         else:
             player.publish(f"{room}/chat", json.dumps([userdata.name, message]))
