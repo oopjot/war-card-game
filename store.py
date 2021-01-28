@@ -53,6 +53,7 @@ class Store:
 
     def start_playing(self):
         self.playing = True
+        self.deck = get_cards()
     
     def shuffle(self):
         random.shuffle(self.deck)
@@ -65,7 +66,8 @@ class Store:
             "messages": self.messages,
             "status": self.status,
             "scores": self.scores,
-            "game_messages": self.game_messages
+            "game_messages": self.game_messages,
+            "moves": self.moves
         })
     
     def get_store_state(self):
@@ -96,16 +98,17 @@ class Store:
         self.scores = room["scores"]
 
     def surrender(self, player):
-        self.players.remove(player)
-        for score in self.scores:
-            if score[0] == player[0]:
-                self.scores.remove(score)
-        self.scores[0][1] = 52
+        if player in self.players:
+            self.players.remove(player)
+            for score in self.scores:
+                if score[0] == player[0]:
+                    self.scores.remove(score)
+            if len(self.players) < 2:
+                self.set_status("Waiting for players")
         self.winner = self.players[0]
         self.deck = get_cards()
         self.gaming = False
-        self.spectators.append(player)
-        
+        self.spectators.append(player)        
 
     def connect(self):
         self.connected = True
@@ -159,6 +162,8 @@ class Store:
         self.status = status
 
     def remove_from_room(self, player):
+        if player in self.spectators:
+            self.spectators.remove(player)
         if player in self.players:
             self.players.remove(player)
             for score in self.scores:
@@ -166,8 +171,10 @@ class Store:
                     self.scores.remove(score)
             if len(self.players) < 2:
                 self.set_status("Waiting for players")
-        if player in self.spectators:
-            self.spectators.remove(player)
+        if self.players:
+            self.winner = self.players[0]
+        self.deck = get_cards()
+        self.gaming = False
     
     def update_score(self, id, amount):
         for score in self.scores:

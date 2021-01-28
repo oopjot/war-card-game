@@ -1,0 +1,56 @@
+.room-container {
+    display: flex;
+    flex-direction: column;
+    width: 80%;
+    height: 400px;
+    margin-left: auto;
+    margin-right: auto;
+    justify-content: space-around;
+    .status-container {
+        height: 50px;
+        margin: auto;
+
+    }
+    .main-container {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        min-height: 300px;
+        .players-container {
+            display: flex;
+            flex-direction: column;
+            .player-container {
+                margin-top: 20px;
+            }
+        }
+        .moves-container {
+            display: flex;
+            flex-direction: column;
+            width: 60%;
+            border: solid black 1px;
+            .cards-container {
+                display: flex;
+                flex-direction: row;
+                justify-content: space-around;
+                .card-container {
+                    img {
+                        width: 140px;
+                        height: 200px;
+                    }
+                    
+                }
+            }
+        }
+        .chat-container {
+            display: flex;
+            flex-direction: column;
+        }
+    }
+    .spectators-container {
+        display: flex;
+        flex-direction: row;
+        div {
+            margin-left: 30px;
+        }
+    }
+}

@@ -4,6 +4,9 @@ import json
 import os
 from store import Store
 from pprint import pprint
+import signal
+import sys
+
 
 def on_connect(client, userdata, flags, rc):
     print("Welcome")
@@ -60,6 +63,7 @@ def on_message(client, userdata, message):
 
     if topic[1] == "leaving":
         removed = json.loads(msg)
+        # userdata.surrender(removed)
         userdata.remove_from_room(removed)
         userdata.print_room()
 
@@ -81,6 +85,20 @@ player.connect("10.45.3.18", 1883, 10)
 running = True
 
 counter = 0
+
+
+def close_handler(signum, frame):
+    if player._userdata.connected:
+        if player._userdata.in_room:
+            room = player._userdata.room
+            id = player._userdata.id
+            player.publish(f"{room}/leaving/{id}", json.dumps([id, player._userdata.name]))
+        player.disconnect()
+    sys.exit(0)
+
+signal.signal(signal.SIGHUP, close_handler)
+signal.signal(signal.SIGINT, close_handler)
+
 
 player.loop_start()
 while running:
@@ -141,10 +159,5 @@ while running:
             player.subscribe(f"{room_name}/#")
 
 
-
-    
 player.loop_stop()
-
-
-
 
