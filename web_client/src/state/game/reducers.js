@@ -5,7 +5,8 @@ const initialGame = {
     messages: [],
     moves: [],
     scores: [],
-    winner: null
+    winner: null,
+    status: ""
 };
 
 
@@ -21,7 +22,17 @@ const game = (state = initialGame, action) => {
         case "UPDATE":
             return {
                 ...state,
-                ...action.payload
+                ...action.payload.room
+            }
+        case "MOVE":
+            return state.moves.length < 2
+            ? {
+                ...state,
+                moves: [...state.moves, action.payload.move]
+            }
+            : {
+                ...state,
+                moves: [action.payload.move]
             }
         default:
             return state

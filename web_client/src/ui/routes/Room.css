@@ -41,6 +41,8 @@
   -webkit-box-direction: normal;
       -ms-flex-direction: column;
           flex-direction: column;
+  min-width: 200px;
+  margin-right: 20px;
 }
 
 .room-container .main-container .players-container .player-container {
@@ -55,8 +57,7 @@
   -webkit-box-direction: normal;
       -ms-flex-direction: column;
           flex-direction: column;
-  width: 60%;
-  border: solid black 1px;
+  width: 40%;
 }
 
 .room-container .main-container .moves-container .cards-container {
@@ -76,6 +77,11 @@
   height: 200px;
 }
 
+.room-container .main-container .moves-container .roundwinner-container {
+  margin-left: auto;
+  margin-right: auto;
+}
+
 .room-container .main-container .chat-container {
   display: -webkit-box;
   display: -ms-flexbox;
@@ -84,9 +90,18 @@
   -webkit-box-direction: normal;
       -ms-flex-direction: column;
           flex-direction: column;
+  max-width: 250px;
+  word-wrap: break-word;
+  margin-left: 30px;
+  overflow-y: scroll;
 }
 
-.room-container .spectators-container {
+.room-container .main-container .chat-container .message-container {
+  margin-bottom: 10px;
+  margin-right: 20px;
+}
+
+.room-container .bottom-section {
   display: -webkit-box;
   display: -ms-flexbox;
   display: flex;
@@ -96,7 +111,42 @@
           flex-direction: row;
 }
 
-.room-container .spectators-container div {
+.room-container .bottom-section .spectators-container {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: column;
+          flex-direction: column;
+  margin-right: 100px;
+}
+
+.room-container .bottom-section .spectators-container div {
   margin-left: 30px;
+}
+
+.room-container .bottom-section .actions-container {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: column;
+          flex-direction: column;
+  margin-right: 100px;
+}
+
+.room-container .bottom-section .actions-container button {
+  margin-bottom: 10px;
+}
+
+.room-container .bottom-section .space {
+  width: 60%;
+}
+
+.room-container .bottom-section .input-container {
+  -ms-flex-item-align: end;
+      align-self: flex-end;
 }
 /*# sourceMappingURL=Room.css.map */

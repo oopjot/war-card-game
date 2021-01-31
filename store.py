@@ -55,6 +55,9 @@ class Store:
         self.playing = True
         self.deck = get_cards()
     
+    def stop_playing(self):
+        self.playing = False
+    
     def shuffle(self):
         random.shuffle(self.deck)
 
@@ -105,7 +108,10 @@ class Store:
                     self.scores.remove(score)
             if len(self.players) < 2:
                 self.set_status("Waiting for players")
-        self.winner = self.players[0]
+        if len(self.players) >= 1:
+            self.winner = self.players[0][0]
+        else:
+            self.winner = False
         self.deck = get_cards()
         self.gaming = False
         self.spectators.append(player)        
@@ -135,6 +141,7 @@ class Store:
         self.scores = []
         self.game_messages = []
         self.moves = []
+        self.winner = None
 
     def add_spectator(self, spectator):
         self.spectators.append(spectator)
@@ -172,7 +179,7 @@ class Store:
             if len(self.players) < 2:
                 self.set_status("Waiting for players")
         if self.players:
-            self.winner = self.players[0]
+            self.winner = self.players[0][0]
         self.deck = get_cards()
         self.gaming = False
     
@@ -207,7 +214,6 @@ class Store:
                 self.deck.append(move1[1])
                 self.deck = self.deck[1:]
             return False
-
     
     def make_move(self, move):
         if len(self.moves) >= 2:
@@ -220,38 +226,53 @@ class Store:
 
         if len(self.moves) < 2:
             self.moves.append(move)
-            for p in self.players:
-                if p[0] == move[0]:
-                    player = p
+            player = self.find_player(move[0])
             self.game_messages.append(f"{player[1]} played {move[1][1]} of {move[1][0]}")
         
         if len(self.moves) == 2:
             winner = self.round(self.moves[0], self.moves[1])
             if winner:
-                for p in self.players:
-                    if p[0] == winner:
-                        player = p
+                player = self.find_player(winner)
                 for s in self.scores:
                     if s[0] == winner:
                         s[1] += 1
                     else:
                         s[1] -= 1
-                        if s[1] == 0:
-                            self.game_messages.append(f"{player[1]} lost the game :(")
+                        if s[1] == 50:
+                            self.game_messages = []
+                            loser = self.find_player(s[0])
+                            self.game_messages.append(f"{loser[1]} lost the game :(")
                             self.winner = winner
+
                 if not self.winner:
                     self.game_messages.append(f"{player[1]} won this round")
             else:
                 self.game_messages.append("draw")
-        
+    
+    def find_player(self, id):
+        for player in self.players:
+            if player[0] == id:
+                return player
+        for spectator in self.spectators:
+            if spectator[0] == id:
+                return spectator
 
 
     def update_status(self):
         if self.gaming:
             self.set_status("Playing")
         if self.winner:
-            self.set_status(f"The winner is: {self.winner[1]}! Congratulations")
-
+            winner_name = self.find_player(self.winner)[1]
+            self.set_status(f"The winner is: {winner_name}! Congratulations")
+            for score in self.scores:
+                if score[0] == self.winner:
+                    score[1] = 52
+                else:
+                    self.scores.remove(score)
+            for player in self.players:
+                if player[1] != winner_name:
+                    self.players.remove(player)
+                    self.spectators.append(player)
         
 
     
@@ -276,7 +297,13 @@ class Store:
             print("Game status:")
             for msg in self.game_messages:
                 print(msg)
-            
+
+            print("\n\n\n")
+
+            print(self.winner)
+
+            # print(self.scores)
+            # print(f"deck of {self.name}")            
             # pprint(self.deck)
 
 

@@ -81,7 +81,6 @@ def on_message(client, userdata, message):
     if topic[1] == "leaving":
         removed = json.loads(msg)
         userdata.remove_from_room(removed)
-        userdata.print_room()
 
 
 
@@ -92,23 +91,6 @@ def find_player(id, inc=False):
         if player._userdata.id == id:
             return player
     return None
-
-# def check_activity():
-#     while True:
-#         for player in players:
-#             if player[0]._userdata.in_room:
-#                 player[2] += 1
-#         time.sleep(2)
-#         for player in players:
-#             if player[1] + 1 < player[2]:
-#                 room = player[0]._userdata.room
-#                 id = player[0]._userdata.id
-#                 name = player[0]._userdata.name
-#                 player[0].publish(f"{room}/leaving/{id}", json.dumps([id, name]))
-#                 player[0].disconnect()
-#                 players.remove(player)
-#         # print(players[0])
-
 
 @app.route("/connect", methods=["POST"])
 @cross_origin()
@@ -167,9 +149,16 @@ def join():
 def get_room_state(id):
     # id = request.args.get("id")
     player = find_player(id)
+    player._userdata.update_status()
     room = player._userdata.get_room_state()
+    if player._userdata.winner:
+        if player._userdata.winner != player._userdata.id and player._userdata.playing:
+            player._userdata.stop_playing()
     # player[1] += 1
-    return json.loads(room)
+    return {
+        "room": json.loads(room),
+        "playing": player._userdata.playing
+    }
 
 
 @app.route("/disconnect/<id>", methods=["POST"])
@@ -185,6 +174,19 @@ def disconnect_player(id):
         "status": "OK"
     }
 
+@app.route("/leave/<id>", methods=["POST"])
+@cross_origin()
+def leave(id):
+    player = find_player(id)
+    if player:
+        if player._userdata.in_room:
+            player.publish(f"{player._userdata.room}/leaving/{player._userdata.id}", json.dumps([player._userdata.id, player._userdata.name]))
+            player.unsubscribe(f"{player._userdata.room}/#")
+            player._userdata.leave()
+    return {
+        "inroom": player._userdata.in_room
+    }
+
 @app.route("/chat/<id>", methods=["POST"])
 @cross_origin()
 def send_message(id):
@@ -198,6 +200,52 @@ def send_message(id):
         "msg": msg
     }
 
+@app.route("/play/<id>", methods=["POST"])
+@cross_origin()
+def play(id):
+    player = find_player(id)
+    player.publish(f"{player._userdata.room}/game/play", json.dumps([player._userdata.id, player._userdata.name]))
+    player._userdata.start_playing()
+    return {
+        "playing": player._userdata.playing
+    }
+
+
+@app.route("/move/<id>", methods=["POST"])
+@cross_origin()
+def move(id):
+    player = find_player(id)
+    move = player._userdata.deck[0]
+    player.publish(f"{player._userdata.room}/game/move", json.dumps([player._userdata.id, move]))
+    time.sleep(1)
+    return {
+        "move": move,
+        "deck": player._userdata.deck
+    }
+
+@app.route("/ff/<id>", methods=["POST"])
+@cross_origin()
+def surrender(id):
+    player = find_player(id)
+    player.publish(f"{player._userdata.room}/game/ff", json.dumps([player._userdata.id, player._userdata.name]))
+    player._userdata.stop_playing()
+    return {
+        "playing": player._userdata.playing
+    }
+
+@app.route("/shuffle/<id>", methods=["POST"])
+@cross_origin()
+def shuffle(id):
+    player = find_player(id)
+    player._userdata.shuffle()
+    return {
+        "deck": player._userdata.deck
+    }
+
+
+
+
+
 if __name__ == "__main__":
     # threading.Thread(target=check_activity).start()
-    app.run(debug=False)
+    app.run(debug=True)

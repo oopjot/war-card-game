@@ -5,7 +5,7 @@ const initialUser = {
     id: "",
     in_room: false,
     playing: false,
-    deck: []
+    // deck: []
 }
 
 
@@ -33,10 +33,16 @@ const user = (state = initialUser, action) => {
                 ...state,
                 playing: true
             }
+        case "UPDATE":
+            return {
+                ...state,
+                playing: action.payload.playing
+            }
         case "LEAVE":
             return {
                 ...state,
-                in_room: false
+                in_room: false,
+                playing: false
             }
         case "SURRENDER":
             return {

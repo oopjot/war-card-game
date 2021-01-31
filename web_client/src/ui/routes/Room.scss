@@ -19,6 +19,8 @@
         .players-container {
             display: flex;
             flex-direction: column;
+            min-width: 200px;
+            margin-right: 20px;
             .player-container {
                 margin-top: 20px;
             }
@@ -26,8 +28,7 @@
         .moves-container {
             display: flex;
             flex-direction: column;
-            width: 60%;
-            border: solid black 1px;
+            width: 40%;
             .cards-container {
                 display: flex;
                 flex-direction: row;
@@ -40,17 +41,51 @@
                     
                 }
             }
+            .roundwinner-container {
+                margin-left: auto;
+                margin-right: auto;                    
+            }
         }
         .chat-container {
             display: flex;
             flex-direction: column;
+            max-width: 250px;
+            word-wrap: break-word;
+            margin-left: 30px;
+            .message-container {
+                margin-bottom: 10px;
+                margin-right: 20px;
+            }
+            // max-height: 600px;
+            overflow-y: scroll;
         }
     }
-    .spectators-container {
+    .bottom-section{
         display: flex;
         flex-direction: row;
-        div {
-            margin-left: 30px;
+
+        .spectators-container {
+            display: flex;
+            flex-direction: column;
+            margin-right: 100px;
+            div {
+                margin-left: 30px;
+            }
+        }
+        .actions-container {
+            display: flex;
+            flex-direction: column;
+            margin-right: 100px;
+            button {
+                margin-bottom: 10px;
+            }
+        }
+        .space {
+            width: 60%;
+        }
+        .input-container {
+            align-self: flex-end;
         }
     }
+
 }

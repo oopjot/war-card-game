@@ -132,6 +132,7 @@ while running:
                         player.publish(f"{room}/game/move", json.dumps([userdata.id, userdata.deck[0]]))
                     if message == "!ff":
                         player.publish(f"{room}/game/ff", json.dumps([userdata.id, userdata.name]))
+                        player._userdata.stop_playing()
                     if message == "!shuffle":
                         player._userdata.shuffle()
         
