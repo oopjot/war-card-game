@@ -211,7 +211,6 @@ def move(id):
     player = find_player(id)
     move = player._userdata.deck[0]
     player.publish(f"{player._userdata.room}/game/move", json.dumps([player._userdata.id, move]))
-    time.sleep(1)
     return {
         "move": move,
         "deck": player._userdata.deck
