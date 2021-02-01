@@ -34,7 +34,7 @@ const Room = ({ user, game, onUpdate, onLeave, onPlay, onMove, onSurrender }) =>
     }
 
     const handleChat = () => {
-        axios.post(`http://localhost:5000/chat/${user.id}`, {name: user.name, message: newMsg})
+        axios.post(`http://10.45.3.18/myapp/chat/${user.id}`, {name: user.name, message: newMsg})
             .then(({ data }) => onUpdate({
                 ...game,
                 messages: [...game.messages, [data.name, data.msg]]
@@ -44,43 +44,43 @@ const Room = ({ user, game, onUpdate, onLeave, onPlay, onMove, onSurrender }) =>
     };
 
     const handlePlay = () => {
-        axios.post(`http://localhost:5000/play/${user.id}`)
+        axios.post(`http://10.45.3.18/myapp/play/${user.id}`)
             .then(({ data }) => data.playing ? onPlay() : data)
             .catch(err => console.log(err));
     };
  
     const handleLeave = () => {
-        axios.post(`http://localhost:5000/leave/${user.id}`)
+        axios.post(`http://10.45.3.18/myapp/leave/${user.id}`)
             .then(({ data }) => data.inroom ? data : onLeave())
             .catch(err => console.log(err));
     };
 
     const handleMove = () => {
-        axios.post(`http://localhost:5000/move/${user.id}`)
+        axios.post(`http://10.45.3.18/myapp/move/${user.id}`)
             .then(({ data }) => data.move ? onMove({move: data.move}) : data.move)
             .catch(err => console.log(err));
     };
 
     const handleSurrender = () => {
-        axios.post(`http://localhost:5000/ff/${user.id}`)
+        axios.post(`http://10.45.3.18/myapp/ff/${user.id}`)
             .then(({ data }) => data.playing ? data : onSurrender())
             .catch(err => console.log(err));
     };
 
     const handleShuffle = () => {
-        axios.post(`http://localhost:5000/shuffle/${user.id}`)
+        axios.post(`http://10.45.3.18/myapp/shuffle/${user.id}`)
             .then(({ data }) => console.log(data.deck))
             .catch(err => console.log(err));
     };
 
     window.addEventListener("beforeunload", ev => {
-        return axios.post(`http://localhost:5000/disconnect/${user.id}`)
+        return axios.post(`http://10.45.3.18/myapp/disconnect/${user.id}`)
             .then(res => res)
             .catch(err => err);
     });
 
     useEffect(() => {
-        axios.get(`http://localhost:5000/room/${user.id}`)
+        axios.get(`http://10.45.3.18/myapp/room/${user.id}`)
             .then(({ data }) => onUpdate(data))
             .catch(err => console.log(err));
         setTimeout(() => setTrigger(!trigger), 1000);

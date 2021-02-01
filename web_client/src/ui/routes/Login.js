@@ -1,24 +1,24 @@
 import axios from "axios";
 import { useEffect, useState } from "react"
 import { connect } from "react-redux";
+import { v4 as uuidv4 } from "uuid";
 
-const Login = ({ user, onConnect, onLogin, onJoin }) => {
+const Login = ({ id, user, onConnect, onLogin, onJoin }) => {
 
     const [name, setName] = useState("");
     const [err, setErr] = useState("");
+    const [trigger, setTrigger] = useState(false);
 
     useEffect(() => {
-        axios.post("http://localhost:5000/connect")
+        axios.post("http://10.45.3.18/myapp/connect", {id})
             .then(({ data }) => {
-                console.log(data);
-                return data.success ? onConnect({ id: data.id }) : data.success
+                return data.success ? onConnect({ id: data.id }) : setTimeout(() => setTrigger(!trigger), 2000);
             })
             .catch(err => console.log(err));
-            // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+    }, [trigger]);
 
     const handleLogin = () => {
-        axios.post("http://localhost:5000/userdata", {id: user.id, name})
+        axios.post("http://10.45.3.18/myapp/userdata", {id: user.id, name})
             .then(({ data }) => {
                 if (data.name){
                     onLogin({ name: data.name, deck: data.deck });

@@ -92,22 +92,27 @@ def find_player(id, inc=False):
 @app.route("/connect", methods=["POST"])
 @cross_origin()
 def connect():
-    player = mqtt.Client(userdata=Store())
-    player.on_connect = on_connect
-    player.on_message = on_message
-    player.connect("10.45.3.18", 1883, 60)
-    players.append(player)
-    threading.Thread(target=player.loop_forever).start()
-    time.sleep(1)
-    if player._userdata.connected:
+    id = request.get_json()["id"]
+    player = find_player(id)
+    if player:
         return {
             "success": player._userdata.connected,
             "id": player._userdata.id
         }, status.HTTP_201_CREATED
     else:
-        return {
-            "success": player._userdata.connected
-        }, status.HTTP_204_NO_CONTENT
+        player = mqtt.Client(userdata=Store())
+        player.on_connect = on_connect
+        player.on_message = on_message
+        player._userdata.set_id(id)
+        player.connect("10.45.3.18", 1883, 60)
+        players.append(player)
+        print(id)
+        print("added")
+        threading.Thread(target=player.loop_forever).start()
+    return {
+        "success": player._userdata.connected,
+        "id": player._userdata.id
+    }, status.HTTP_201_CREATED
 
 @app.route("/userdata", methods=["POST"])
 @cross_origin()
@@ -133,11 +138,17 @@ def join():
     id = body["id"]
     player = find_player(id)
     player._userdata.join(room)
-    player.publish(f"{room}/joining/{player._userdata.id}", json.dumps([player._userdata.id, player._userdata.name]))
+    player.publish(f"{room}/joining/{player._userdata.id}", json.dumps([player._userdata.id, player._use$
     player.subscribe(f"{room}/#")
 
-    time.sleep(1)
-    return player._userdata.get_room_state(), status.HTTP_202_ACCEPTED
+    if not player._userdata.in_room:
+        return {
+            "in_room": player._userdata.in_room
+        }, status.HTTP_202_ACCEPTED
+    return {
+        "in_room": player._userdata.in_room,
+        "room": player._userdata.get_room_state()
+    }, status.HTTP_202_ACCEPTED
 
 @app.route("/room/<id>", methods=["GET"])
 @cross_origin()

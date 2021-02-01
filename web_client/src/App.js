@@ -3,10 +3,12 @@ import { connect } from "react-redux";
 import Lobby from "./ui/routes/Lobby";
 import Login from "./ui/routes/Login";
 import Room from "./ui/routes/Room";
+import { v4 as uuidv4 } from "uuid";
 
 const App = ({ user }) => {
+  const id = uuidv4();
 
-  const [page, setPage] = useState(<Login />);
+  const [page, setPage] = useState(<Login id={id} />);
 
   useEffect(() => setPage(getPage()), [user.connected, user.in_room, user.name]);
 
@@ -14,10 +16,10 @@ const App = ({ user }) => {
   ? <Room /> 
   : user.name
   ? <Lobby />
-  : <Login />
+  : <Login id={id} />
 
   return (<div>
-    {getPage()}
+    {page}
   </div>
   )
 
