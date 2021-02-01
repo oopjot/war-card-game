@@ -13,7 +13,7 @@ import signal
 
 
 import paho.mqtt.client as mqtt
-from store import Store
+from src.store import Store
 
 app = Flask(__name__)
 cors = CORS(app)

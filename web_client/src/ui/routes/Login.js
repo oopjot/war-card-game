@@ -1,7 +1,6 @@
 import axios from "axios";
 import { useEffect, useState } from "react"
 import { connect } from "react-redux";
-import { v4 as uuidv4 } from "uuid";
 
 const Login = ({ id, user, onConnect, onLogin, onJoin }) => {
 
@@ -15,6 +14,7 @@ const Login = ({ id, user, onConnect, onLogin, onJoin }) => {
                 return data.success ? onConnect({ id: data.id }) : setTimeout(() => setTrigger(!trigger), 2000);
             })
             .catch(err => console.log(err));
+            // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [trigger]);
 
     const handleLogin = () => {

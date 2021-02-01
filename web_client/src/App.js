@@ -10,7 +10,10 @@ const App = ({ user }) => {
 
   const [page, setPage] = useState(<Login id={id} />);
 
-  useEffect(() => setPage(getPage()), [user.connected, user.in_room, user.name]);
+  useEffect(() => {
+    setPage(getPage()) 
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user.connected, user.in_room, user.name]);
 
   const getPage = () => user.in_room 
   ? <Room /> 

@@ -2,7 +2,7 @@ import paho.mqtt.client as mqtt
 from uuid import uuid4
 import json
 import os
-from store import Store
+from src.store import Store
 from pprint import pprint
 import signal
 import sys
