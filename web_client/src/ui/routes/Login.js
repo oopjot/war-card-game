@@ -14,7 +14,8 @@ const Login = ({ user, onConnect, onLogin, onJoin }) => {
                 return data.success ? onConnect({ id: data.id }) : data.success
             })
             .catch(err => console.log(err));
-    }, [])
+            // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     const handleLogin = () => {
         axios.post("http://localhost:5000/userdata", {id: user.id, name})
@@ -38,16 +39,8 @@ const Login = ({ user, onConnect, onLogin, onJoin }) => {
             <button onClick={handleLogin}>Login</button>
             {err}
         </div>
-    )
-    // return (
-    //     <div>
-    //         <h1>Welcome, {user.name}</h1>
-    //         <input type="text" value={room} onChange={e => setRoom(e.target.value)} />
-    //         <button onClick={handleJoin}>Join</button>
-    //         {err}
-    //     </div>
-    // )
-}
+    );
+};
 
 const mapStateToProps = state => ({
     user: state.user

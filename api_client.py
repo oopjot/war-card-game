@@ -1,5 +1,6 @@
 from flask import Flask, jsonify, request
 from flask_cors import CORS, cross_origin
+from flask_api import status
 
 import time
 import threading
@@ -76,13 +77,9 @@ def on_message(client, userdata, message):
             player = json.loads(msg)
             userdata.surrender(player)
 
-
-
     if topic[1] == "leaving":
         removed = json.loads(msg)
         userdata.remove_from_room(removed)
-
-
 
 players = []
 
@@ -95,8 +92,6 @@ def find_player(id, inc=False):
 @app.route("/connect", methods=["POST"])
 @cross_origin()
 def connect():
-    # print(players)
-    # print("siemka")
     player = mqtt.Client(userdata=Store())
     player.on_connect = on_connect
     player.on_message = on_message
@@ -108,11 +103,11 @@ def connect():
         return {
             "success": player._userdata.connected,
             "id": player._userdata.id
-        }
+        }, status.HTTP_201_CREATED
     else:
         return {
             "success": player._userdata.connected
-        }
+        }, status.HTTP_204_NO_CONTENT
 
 @app.route("/userdata", methods=["POST"])
 @cross_origin()
@@ -124,11 +119,11 @@ def userdata():
         return {
             "name": player._userdata.name,
             "deck": player._userdata.deck
-        }
+        }, status.HTTP_206_PARTIAL_CONTENT
     else:
         return {
             "name": False
-        }
+        }, status.HTTP_204_NO_CONTENT
 
 @app.route("/join", methods=["POST"])
 @cross_origin()
@@ -141,24 +136,23 @@ def join():
     player.publish(f"{room}/joining/{player._userdata.id}", json.dumps([player._userdata.id, player._userdata.name]))
     player.subscribe(f"{room}/#")
 
-    time.sleep(2)
-    return player._userdata.get_room_state()
+    time.sleep(1)
+    return player._userdata.get_room_state(), status.HTTP_202_ACCEPTED
 
 @app.route("/room/<id>", methods=["GET"])
 @cross_origin()
 def get_room_state(id):
-    # id = request.args.get("id")
     player = find_player(id)
     player._userdata.update_status()
     room = player._userdata.get_room_state()
     if player._userdata.winner:
         if player._userdata.winner != player._userdata.id and player._userdata.playing:
             player._userdata.stop_playing()
-    # player[1] += 1
+    print(room)
     return {
         "room": json.loads(room),
         "playing": player._userdata.playing
-    }
+    }, status.HTTP_202_ACCEPTED
 
 
 @app.route("/disconnect/<id>", methods=["POST"])
@@ -172,7 +166,7 @@ def disconnect_player(id):
         players.remove(player)
     return {
         "status": "OK"
-    }
+    }, status.HTTP_204_NO_CONTENT
 
 @app.route("/leave/<id>", methods=["POST"])
 @cross_origin()
@@ -185,7 +179,7 @@ def leave(id):
             player._userdata.leave()
     return {
         "inroom": player._userdata.in_room
-    }
+    }, status.HTTP_205_RESET_CONTENT
 
 @app.route("/chat/<id>", methods=["POST"])
 @cross_origin()
@@ -198,7 +192,7 @@ def send_message(id):
     return {
         "name": name,
         "msg": msg
-    }
+    }, status.HTTP_206_PARTIAL_CONTENT
 
 @app.route("/play/<id>", methods=["POST"])
 @cross_origin()
@@ -208,7 +202,7 @@ def play(id):
     player._userdata.start_playing()
     return {
         "playing": player._userdata.playing
-    }
+    }, status.HTTP_202_ACCEPTED
 
 
 @app.route("/move/<id>", methods=["POST"])
@@ -221,7 +215,7 @@ def move(id):
     return {
         "move": move,
         "deck": player._userdata.deck
-    }
+    }, status.HTTP_202_ACCEPTED
 
 @app.route("/ff/<id>", methods=["POST"])
 @cross_origin()
@@ -231,7 +225,7 @@ def surrender(id):
     player._userdata.stop_playing()
     return {
         "playing": player._userdata.playing
-    }
+    }, status.HTTP_202_ACCEPTED
 
 @app.route("/shuffle/<id>", methods=["POST"])
 @cross_origin()
@@ -240,12 +234,8 @@ def shuffle(id):
     player._userdata.shuffle()
     return {
         "deck": player._userdata.deck
-    }
-
-
-
+    }, status.HTTP_202_ACCEPTED
 
 
 if __name__ == "__main__":
-    # threading.Thread(target=check_activity).start()
     app.run(debug=True)

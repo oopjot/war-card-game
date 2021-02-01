@@ -6,7 +6,6 @@ import "./Room.css"
 const Room = ({ user, game, onUpdate, onLeave, onPlay, onMove, onSurrender }) => {
 
     const [trigger, setTrigger] = useState(false);
-    const [roundWinner, setRoundWinner] = useState("");
     const [newMsg, setNewMsg] = useState("");
     
     const playersWithScore = game.players.map((p, index) => [p[1], game.scores[index][1]])
@@ -22,25 +21,8 @@ const Room = ({ user, game, onUpdate, onLeave, onPlay, onMove, onSurrender }) =>
         : {}
     }) : [];
 
-    const getRoundWinner = () => {
-        if (game.players.length < 2) return
-        if (game.moves.length === 2) {
-            if (game.moves[0][1][2] > game.moves[1][1][2]) {
-                const player = game.players.find(p => game.moves[0][0] === p[0]);
-                return setRoundWinner(`${player[1]} wins this round`)
-            } else if (game.moves[0][1][2] < game.moves[1][1][2]) {
-                const player = game.players.find(p => game.moves[1][0] === p[0]);
-                return setRoundWinner(`${player[1]} wins this round`)
-            } else {
-                return setRoundWinner("draw")
-            }
-        } else {
-            return setRoundWinner("")
-        }
-    };
-
     const getGameButtons = () => {
-        return user.playing
+        return user.playing && game.players.length >=2
         ? (
             <>
                 <button onClick={handleMove}>Move</button>
@@ -101,9 +83,9 @@ const Room = ({ user, game, onUpdate, onLeave, onPlay, onMove, onSurrender }) =>
         axios.get(`http://localhost:5000/room/${user.id}`)
             .then(({ data }) => onUpdate(data))
             .catch(err => console.log(err));
-        getRoundWinner();
         setTimeout(() => setTrigger(!trigger), 1000);
-    }, [trigger, onUpdate])
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [trigger, onUpdate, user.id])
 
     if (!user.in_room) return <><h1>Please refresh</h1></>
     return (
@@ -130,7 +112,6 @@ const Room = ({ user, game, onUpdate, onLeave, onPlay, onMove, onSurrender }) =>
                             ))}                    
                         </div>
                         <div className="roundwinner-container">
-                            <div>{roundWinner}</div>
                         </div> 
                     </div>
                     <div className="chat-container">

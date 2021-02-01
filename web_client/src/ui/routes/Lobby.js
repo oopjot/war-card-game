@@ -24,8 +24,8 @@ const Lobby = ({ user, onJoin }) => {
             <button onClick={handleJoin}>Join</button>
             {err}
         </div>
-    )
-}
+    );
+};
 
 const mapStateToProps = state => ({
     user: state.user

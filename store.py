@@ -238,7 +238,7 @@ class Store:
                         s[1] += 1
                     else:
                         s[1] -= 1
-                        if s[1] == 50:
+                        if s[1] == 0:
                             self.game_messages = []
                             loser = self.find_player(s[0])
                             self.game_messages.append(f"{loser[1]} lost the game :(")
@@ -297,15 +297,6 @@ class Store:
             print("Game status:")
             for msg in self.game_messages:
                 print(msg)
-
-            print("\n\n\n")
-
-            print(self.winner)
-
-            # print(self.scores)
-            # print(f"deck of {self.name}")            
-            # pprint(self.deck)
-
 
         else:
             os.system("clear")
